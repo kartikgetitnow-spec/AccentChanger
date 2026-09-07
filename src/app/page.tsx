@@ -79,6 +79,7 @@ export default function HomePage() {
             isConnected={isConnected}
             statusMessage={statusMessage}
             latencyMs={latencyMs}
+            serverUrl={settings.serverUrl}
           />
           <button
             onClick={() => setIsSettingsOpen(true)}

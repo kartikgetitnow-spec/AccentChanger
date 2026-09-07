@@ -7,12 +7,14 @@ interface ConnectionBadgeProps {
   isConnected: boolean;
   statusMessage: string;
   latencyMs?: number | null;
+  serverUrl?: string;
 }
 
 export const ConnectionBadge: React.FC<ConnectionBadgeProps> = ({
   isConnected,
   statusMessage,
   latencyMs,
+  serverUrl,
 }) => {
   const [ping, setPing] = useState<number | null>(null);
 
@@ -25,7 +27,10 @@ export const ConnectionBadge: React.FC<ConnectionBadgeProps> = ({
     const interval = setInterval(async () => {
       const start = performance.now();
       try {
-        const res = await fetch("/api/health");
+        const targetUrl = serverUrl?.trim()
+          ? `${serverUrl.trim().replace(/\/$/, "")}/api/health`
+          : "/api/health";
+        const res = await fetch(targetUrl);
         if (res.ok) {
           const latency = Math.round(performance.now() - start);
           setPing(latency);
@@ -36,7 +41,7 @@ export const ConnectionBadge: React.FC<ConnectionBadgeProps> = ({
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [isConnected]);
+  }, [isConnected, serverUrl]);
 
   const displayLatency = latencyMs || ping;
 
