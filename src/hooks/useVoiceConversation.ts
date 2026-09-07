@@ -78,15 +78,26 @@ export function useVoiceConversation() {
     recorderRef.current = new AudioRecorder();
     playerRef.current = new AudioPlayer();
 
-    const socket = io({
-      path: "/socket.io",
-      transports: ["websocket", "polling"],
-      reconnection: true,
-      reconnectionAttempts: 15,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      timeout: 10000,
-    });
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || undefined;
+    const socket = socketUrl
+      ? io(socketUrl, {
+          path: "/socket.io",
+          transports: ["websocket", "polling"],
+          reconnection: true,
+          reconnectionAttempts: 15,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 5000,
+          timeout: 10000,
+        })
+      : io({
+          path: "/socket.io",
+          transports: ["websocket", "polling"],
+          reconnection: true,
+          reconnectionAttempts: 15,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 5000,
+          timeout: 10000,
+        });
     socketRef.current = socket;
 
     socket.on("connect", () => {
