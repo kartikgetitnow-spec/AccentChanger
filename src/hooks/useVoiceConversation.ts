@@ -25,6 +25,9 @@ export function useVoiceConversation() {
     let savedServerUrl = "";
     if (typeof window !== "undefined") {
       savedServerUrl = localStorage.getItem("accent_changer_server_url") || "";
+      if (!savedServerUrl && window.location.hostname.includes("vercel.app")) {
+        savedServerUrl = "https://accentchanger.onrender.com";
+      }
     }
     return {
       voice: "American to UK (USA ➔ UK)",
@@ -85,7 +88,12 @@ export function useVoiceConversation() {
     recorderRef.current = new AudioRecorder();
     playerRef.current = new AudioPlayer();
 
-    const targetUrl = settings.serverUrl?.trim() || process.env.NEXT_PUBLIC_SOCKET_URL || undefined;
+    const targetUrl =
+      settings.serverUrl?.trim() ||
+      process.env.NEXT_PUBLIC_SOCKET_URL ||
+      (typeof window !== "undefined" && window.location.hostname.includes("vercel.app")
+        ? "https://accentchanger.onrender.com"
+        : undefined);
     const socket = targetUrl
       ? io(targetUrl, {
           path: "/socket.io",
