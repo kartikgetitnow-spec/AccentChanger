@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AccentChanger
 
-## Getting Started
+> Real-time conversational AI voice & accent converter powered by **Gemini Multimodal Live API**, **RVC (Retrieval-based Voice Conversion)**, **Next.js**, and **WebSockets**.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🌟 Key Features
+
+- **Bidirectional Accent Conversion**:
+  - 🇺🇸 ➔ 🇬🇧 **American to UK**: Converts conversational American English into authentic British English (Received Pronunciation / BBC English) with tailored vocabulary, idioms, and non-rhotic prosody.
+  - 🇬🇧 ➔ 🇺🇸 **UK to USA**: Converts conversational British English into natural General American English with crisp rhotic pronunciation.
+- **Direct Regional Accents & Personas**:
+  - 🇬🇧 **British (UK)** (Refined, articulate RP English)
+  - 🇺🇸 **General American (USA)** (Energetic, natural American)
+  - 🇦🇺 **Australian (Aussie)** (Friendly, colloquial Aussie slang)
+  - 🎙️ **Donald Trump** (Cloned voice signature via RVC)
+  - 🎙️ **Joe Rogan** (Podcast voice persona via RVC)
+- **Ultra-Low Latency Streaming**:
+  - Direct linear PCM streaming (16kHz, 16-bit mono) via `ScriptProcessorNode` and Web Audio API.
+  - Sub-millisecond in-memory audio resampling and noise gating.
+- **Mobile Hardware Adaptive**:
+  - Automatic resampling of mobile microphone sample rates (44.1kHz / 48kHz on iOS/Android) to clean 16kHz PCM.
+  - AudioContext auto-unlock on user gesture for seamless mobile speaker playback.
+  - Built-in HTTPS / WSS support for mobile microphone access.
+- **Dual Real-time Visualizers & Controls**:
+  - Live frequency spectrums for both microphone input and AI voice output.
+  - Push-to-Talk and Click-to-Talk toggle modes.
+  - Live latency tracking and transcript history.
+
+---
+
+## 🏗️ Architecture
+
+```
+Browser (Next.js + Web Audio API)
+       │  ▲
+       │  │ Bidirectional WebSocket / WSS (16kHz PCM Audio & Transcripts)
+       ▼  │
+Custom Node.js Server (Express + Socket.IO + Session Manager)
+       │  ▲
+       │  │ Low-latency in-memory Audio Buffer Queue & Framing
+       ▼  │
+Gemini Multimodal Live API (Bidirectional WebSocket)
+       │
+       ▼ (24kHz PCM Audio Stream)
+RVC Engine / DSP Voice Transformation (Pitch Shift & Formant Resonators)
+       │
+       ▼ (WAV Packaged Audio Stream)
+Frontend AudioPlayer (Seamless lookahead scheduled playback)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Quick Start
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Prerequisites
+- Node.js 18+ or 20+
+- A Google Gemini API key with access to Gemini Live
 
-## Learn More
+### 2. Installation
+```bash
+git clone https://github.com/kartikgetitnow-spec/AccentChanger.git
+cd AccentChanger
+npm install
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Configure Environment Variables
+Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+Fill in your Gemini credentials:
+```env
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=models/gemini-3.1-flash-live-preview
+PORT=3000
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Run Development or Production Server
+```bash
+# Build production bundle
+npm run build
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Start server
+npm start
+```
+Open **`https://localhost:3000`** in your browser.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📱 Mobile Access (LAN)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+To open the app from a smartphone on your local Wi-Fi:
+1. Ensure the server is running.
+2. Find your local IP (e.g. `10.75.98.210`).
+3. Open `https://<YOUR_IP>:3000` on Safari or Chrome on your mobile device.
+4. Accept the local SSL certificate and tap **TALK**!
+
+---
+
+## 📜 License
+MIT License.
