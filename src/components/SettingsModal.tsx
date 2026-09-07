@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { X, Sliders, Volume2, Mic, Cpu } from "lucide-react";
+import { X, Sliders, Volume2, Mic, Cpu, Server } from "lucide-react";
 
 export interface ConversationSettings {
   voice: string;
@@ -9,6 +9,7 @@ export interface ConversationSettings {
   latencyMode: "low-latency" | "high-quality";
   talkMode: "toggle" | "push-to-talk";
   echoCancellation: boolean;
+  serverUrl?: string;
 }
 
 interface SettingsModalProps {
@@ -153,6 +154,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               High Quality Jitter Buffer
             </button>
           </div>
+        </div>
+
+        {/* Backend WebSocket Server URL */}
+        <div className="space-y-2 pt-1 border-t border-zinc-800">
+          <div className="flex justify-between items-center text-xs">
+            <label className="font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+              <Server className="w-3.5 h-3.5 text-blue-400" />
+              Backend Server URL
+            </label>
+            <span className="text-[10px] text-zinc-500">For Vercel / Netlify</span>
+          </div>
+          <input
+            type="text"
+            placeholder="e.g. https://your-backend.onrender.com (or empty for same host)"
+            value={settings.serverUrl || ""}
+            onChange={(e) => onUpdateSettings({ serverUrl: e.target.value })}
+            className="w-full bg-zinc-800 border border-zinc-700 text-xs rounded-xl px-3 py-2 text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <p className="text-[11px] text-zinc-400 leading-relaxed">
+            Vercel is serverless and cannot host persistent WebSocket connections. If using Vercel, enter your persistent backend server URL (from Render, Railway, or a local tunnel).
+          </p>
         </div>
 
         {/* Modal Footer */}

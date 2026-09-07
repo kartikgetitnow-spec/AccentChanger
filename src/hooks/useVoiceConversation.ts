@@ -21,12 +21,19 @@ export function useVoiceConversation() {
   const [statusMessage, setStatusMessage] = useState("Disconnected");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const [settings, setSettings] = useState<ConversationSettings>({
-    voice: "Donald Trump",
-    pitchShift: 0,
-    latencyMode: "low-latency",
-    talkMode: "toggle",
-    echoCancellation: true,
+  const [settings, setSettings] = useState<ConversationSettings>(() => {
+    let savedServerUrl = "";
+    if (typeof window !== "undefined") {
+      savedServerUrl = localStorage.getItem("accent_changer_server_url") || "";
+    }
+    return {
+      voice: "American to UK (USA ➔ UK)",
+      pitchShift: 0,
+      latencyMode: "low-latency",
+      talkMode: "toggle",
+      echoCancellation: true,
+      serverUrl: savedServerUrl || process.env.NEXT_PUBLIC_SOCKET_URL || "",
+    };
   });
 
   const [volume, setVolumeState] = useState(1.0);
@@ -78,9 +85,9 @@ export function useVoiceConversation() {
     recorderRef.current = new AudioRecorder();
     playerRef.current = new AudioPlayer();
 
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || undefined;
-    const socket = socketUrl
-      ? io(socketUrl, {
+    const targetUrl = settings.serverUrl?.trim() || process.env.NEXT_PUBLIC_SOCKET_URL || undefined;
+    const socket = targetUrl
+      ? io(targetUrl, {
           path: "/socket.io",
           transports: ["websocket", "polling"],
           reconnection: true,
@@ -105,6 +112,23 @@ export function useVoiceConversation() {
       setStatusMessage("Connected to Server");
       setErrorMessage(null);
       addLog("info", `Socket connected: ${socket.id}`);
+    });
+
+    socket.on("connect_error", (error) => {
+      setIsConnected(false);
+      const isVercel =
+        typeof window !== "undefined" &&
+        (window.location.hostname.includes("vercel.app") ||
+          window.location.hostname.includes("netlify.app"));
+      if (isVercel && !settings.serverUrl?.trim()) {
+        setErrorMessage(
+          "Vercel is serverless and cannot run persistent WebSockets. Tap ⚙ Configure to enter your backend server URL (e.g. Render / Railway / local tunnel)."
+        );
+      } else {
+        setErrorMessage(`Server connection error: ${error.message}`);
+      }
+      setStatusMessage("Connection Failed");
+      addLog("error", `Connection failed: ${error.message}`);
     });
 
     socket.io.on("reconnect_attempt", (attempt) => {
@@ -200,7 +224,7 @@ export function useVoiceConversation() {
       playerRef.current?.stop();
       socket.disconnect();
     };
-  }, [addLog, addMessage]);
+  }, [addLog, addMessage, settings.serverUrl]);
 
   // Start Voice Streaming session
   const startConversation = useCallback(async () => {
@@ -261,6 +285,9 @@ export function useVoiceConversation() {
   }, [addLog]);
 
   const updateSettings = useCallback((newSettings: Partial<ConversationSettings>) => {
+    if (typeof window !== "undefined" && newSettings.serverUrl !== undefined) {
+      localStorage.setItem("accent_changer_server_url", newSettings.serverUrl);
+    }
     setSettings((prev) => ({ ...prev, ...newSettings }));
   }, []);
 

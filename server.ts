@@ -21,6 +21,18 @@ async function bootstrap() {
 
   const app = express();
 
+  // Allow cross-origin requests from Vercel / Netlify / external frontends
+  app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    if (req.method === "OPTIONS") {
+      res.sendStatus(200);
+      return;
+    }
+    next();
+  });
+
   // Configure HTTP or HTTPS server based on SSL certificates
   const sslKeyPath = process.env.SSL_KEY_PATH;
   const sslCrtPath = process.env.SSL_CRT_PATH;
