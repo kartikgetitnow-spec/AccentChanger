@@ -23,14 +23,25 @@ export function useVoiceConversation() {
 
   const [settings, setSettings] = useState<ConversationSettings>(() => {
     let savedServerUrl = "";
+    let savedVoice = "USA Accent";
     if (typeof window !== "undefined") {
       savedServerUrl = localStorage.getItem("accent_changer_server_url") || "";
       if (!savedServerUrl && window.location.hostname.includes("vercel.app")) {
         savedServerUrl = "https://accentchanger.onrender.com";
       }
+      const rawVoice = localStorage.getItem("accent_changer_voice");
+      if (
+        rawVoice === "UK Accent" ||
+        rawVoice?.toLowerCase().includes("uk") ||
+        rawVoice?.toLowerCase().includes("british")
+      ) {
+        savedVoice = "UK Accent";
+      } else if (rawVoice) {
+        savedVoice = "USA Accent";
+      }
     }
     return {
-      voice: "American to UK (USA ➔ UK)",
+      voice: savedVoice,
       pitchShift: 0,
       latencyMode: "low-latency",
       talkMode: "toggle",
@@ -293,8 +304,13 @@ export function useVoiceConversation() {
   }, [addLog]);
 
   const updateSettings = useCallback((newSettings: Partial<ConversationSettings>) => {
-    if (typeof window !== "undefined" && newSettings.serverUrl !== undefined) {
-      localStorage.setItem("accent_changer_server_url", newSettings.serverUrl);
+    if (typeof window !== "undefined") {
+      if (newSettings.serverUrl !== undefined) {
+        localStorage.setItem("accent_changer_server_url", newSettings.serverUrl);
+      }
+      if (newSettings.voice !== undefined) {
+        localStorage.setItem("accent_changer_voice", newSettings.voice);
+      }
     }
     setSettings((prev) => ({ ...prev, ...newSettings }));
   }, []);

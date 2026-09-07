@@ -89,7 +89,7 @@ async function bootstrap() {
 
     // Client starts microphone streaming session with persona
     socket.on("start-stream", async (data?: { voice?: string; sampleRate?: number; pitchShift?: number }) => {
-      const selectedVoice = data?.voice || "Donald Trump";
+      const selectedVoice = data?.voice || "USA Accent";
       console.log(`[Socket.IO] Stream started for ${socket.id}. Voice: ${selectedVoice}, Pitch: ${data?.pitchShift ?? 0}`);
 
       try {

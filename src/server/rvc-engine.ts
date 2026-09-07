@@ -18,7 +18,26 @@ export class RVCEngine {
   constructor() {
     this.inferenceApiUrl = process.env.RVC_INFERENCE_URL || null;
 
-    // Register Accent Transformation & Voice Models
+    // Register USA Accent and UK Accent Models
+    this.registerVoice({
+      id: "usa_accent",
+      name: "USA Accent",
+      pitchShift: 0,
+      formantShift: 1.0,
+      indexRate: 0.0,
+      filterRadius: 1,
+    });
+
+    this.registerVoice({
+      id: "uk_accent",
+      name: "UK Accent",
+      pitchShift: 0.5,
+      formantShift: 1.05,
+      indexRate: 0.8,
+      filterRadius: 3,
+    });
+
+    // Backwards-compatible presets
     this.registerVoice({
       id: "usa_to_uk",
       name: "American to UK (USA ➔ UK)",
@@ -54,36 +73,6 @@ export class RVCEngine {
       indexRate: 0.0,
       filterRadius: 1,
     });
-
-    this.registerVoice({
-      id: "australian",
-      name: "Australian (Aussie)",
-      pitchShift: 0.3,
-      formantShift: 1.03,
-      indexRate: 0.7,
-      filterRadius: 2,
-    });
-
-    this.registerVoice({
-      id: "trump",
-      name: "Donald Trump",
-      pitchShift: -1.5,
-      formantShift: 0.92,
-      indexRate: 0.85,
-      filterRadius: 3,
-      modelFile: "models/rvc/trump_v2.pth",
-      indexFile: "models/rvc/trump_v2.index",
-    });
-
-    this.registerVoice({
-      id: "rogan",
-      name: "Joe Rogan",
-      pitchShift: -2.0,
-      formantShift: 0.95,
-      indexRate: 0.8,
-      filterRadius: 3,
-      modelFile: "models/rvc/rogan_v2.pth",
-    });
   }
 
   registerVoice(config: RvcVoiceConfig) {
@@ -92,11 +81,14 @@ export class RVCEngine {
   }
 
   getVoiceConfig(nameOrId: string): RvcVoiceConfig {
-    return (
-      this.voiceConfigs.get(nameOrId) ||
-      this.voiceConfigs.get("American to UK (USA ➔ UK)") ||
-      this.voiceConfigs.get("Donald Trump")!
-    );
+    if (this.voiceConfigs.has(nameOrId)) {
+      return this.voiceConfigs.get(nameOrId)!;
+    }
+    const lower = (nameOrId || "").toLowerCase();
+    if (lower.includes("uk") || lower.includes("british") || lower.includes("britain")) {
+      return this.voiceConfigs.get("UK Accent")!;
+    }
+    return this.voiceConfigs.get("USA Accent") || Array.from(this.voiceConfigs.values())[0];
   }
 
   /**

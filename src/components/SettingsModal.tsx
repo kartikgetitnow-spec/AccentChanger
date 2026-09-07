@@ -48,27 +48,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="space-y-2">
           <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
             <Cpu className="w-3.5 h-3.5 text-blue-400" />
-            Accent & Voice Persona
+            Accent & Voice Persona (AI Spoken Output)
           </label>
           <select
-            value={settings.voice}
+            value={
+              settings.voice === "UK Accent" ||
+              settings.voice.toLowerCase().includes("uk") ||
+              settings.voice.toLowerCase().includes("british")
+                ? "UK Accent"
+                : "USA Accent"
+            }
             onChange={(e) => onUpdateSettings({ voice: e.target.value })}
             className="w-full bg-zinc-800 border border-zinc-700 text-sm rounded-xl px-3 py-2.5 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <optgroup label="Accent Converters">
-              <option value="American to UK (USA ➔ UK)">🇺🇸 ➔ 🇬🇧 American to UK (USA ➔ UK)</option>
-              <option value="UK to USA (UK ➔ USA)">🇬🇧 ➔ 🇺🇸 UK to USA (UK ➔ USA)</option>
-            </optgroup>
-            <optgroup label="Direct Regional Accents">
-              <option value="British (UK)">🇬🇧 British (UK) Accent</option>
-              <option value="American (USA)">🇺🇸 American (USA) Accent</option>
-              <option value="Australian (Aussie)">🇦🇺 Australian (Aussie) Accent</option>
-            </optgroup>
-            <optgroup label="Cloned Celebrity Voices (RVC)">
-              <option value="Donald Trump">🎙️ Donald Trump (RVC Model)</option>
-              <option value="Joe Rogan">🎙️ Joe Rogan (RVC Model)</option>
-            </optgroup>
+            <option value="USA Accent">🇺🇸 USA Accent (American Voice Output)</option>
+            <option value="UK Accent">🇬🇧 UK Accent (British Voice Output)</option>
           </select>
+          <p className="text-[11px] text-zinc-500">
+            Selected accent will be the spoken output voice of the AI in real-time.
+          </p>
         </div>
 
         {/* Pitch Shift Slider */}

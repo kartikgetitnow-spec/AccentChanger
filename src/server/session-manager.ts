@@ -43,7 +43,7 @@ export class SessionManager {
   /**
    * Initialize a new session for a connected socket
    */
-  createSession(socket: Socket, voice = "Donald Trump"): UserSession {
+  createSession(socket: Socket, voice = "USA Accent"): UserSession {
     if (!this.canAcceptSession()) {
       throw new Error("Server is at maximum concurrent session capacity. Please try again shortly.");
     }

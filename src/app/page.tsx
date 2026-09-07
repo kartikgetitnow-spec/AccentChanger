@@ -19,12 +19,18 @@ import {
 } from "lucide-react";
 
 const ACCENT_PRESETS = [
-  { id: "American to UK (USA ➔ UK)", label: "🇺🇸➔🇬🇧 USA to UK", desc: "American to British Accent Converter" },
-  { id: "UK to USA (UK ➔ USA)", label: "🇬🇧➔🇺🇸 UK to USA", desc: "British to American Accent Converter" },
-  { id: "British (UK)", label: "🇬🇧 British", desc: "Refined UK Accent" },
-  { id: "American (USA)", label: "🇺🇸 American", desc: "General American Accent" },
-  { id: "Australian (Aussie)", label: "🇦🇺 Aussie", desc: "Australian Accent" },
-  { id: "Donald Trump", label: "🎙️ Trump", desc: "Donald Trump Voice" },
+  {
+    id: "USA Accent",
+    label: "🇺🇸 USA Accent",
+    tagline: "American Voice Output",
+    desc: "AI speaks in an authentic General American (USA) accent",
+  },
+  {
+    id: "UK Accent",
+    label: "🇬🇧 UK Accent",
+    tagline: "British Voice Output",
+    desc: "AI speaks in a refined British (UK) accent",
+  },
 ];
 
 export default function HomePage() {
@@ -63,8 +69,12 @@ export default function HomePage() {
           <div>
             <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
               AccentChanger
-              <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 max-w-[160px] truncate">
-                {settings.voice}
+              <span className="text-[10px] uppercase font-mono px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 max-w-[160px] truncate">
+                {settings.voice === "UK Accent" ||
+                settings.voice.includes("UK") ||
+                settings.voice.includes("British")
+                  ? "🇬🇧 UK Accent"
+                  : "🇺🇸 USA Accent"}
               </span>
             </h1>
             <p className="text-xs text-zinc-400">
@@ -131,22 +141,54 @@ export default function HomePage() {
                 </button>
               </div>
 
-              {/* Quick-Switch Accent Pills */}
-              <div className="grid grid-cols-3 gap-1.5 w-full">
-                {ACCENT_PRESETS.map((opt) => (
-                  <button
-                    key={opt.id}
-                    onClick={() => updateSettings({ voice: opt.id })}
-                    className={`py-1.5 px-2 rounded-xl text-[11px] font-medium transition-all text-center truncate border ${
-                      settings.voice === opt.id
-                        ? "bg-amber-500/20 border-amber-500/60 text-amber-300 font-semibold shadow-sm shadow-amber-500/10"
-                        : "bg-zinc-800/60 border-zinc-700/60 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
-                    }`}
-                    title={opt.desc}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+              {/* Quick-Switch Accent Selector: USA vs UK */}
+              <div className="grid grid-cols-2 gap-2.5 w-full">
+                {ACCENT_PRESETS.map((opt) => {
+                  const isSelected =
+                    settings.voice === opt.id ||
+                    (opt.id === "USA Accent" &&
+                      (settings.voice.includes("USA") || settings.voice.includes("American"))) ||
+                    (opt.id === "UK Accent" &&
+                      (settings.voice.includes("UK") || settings.voice.includes("British")));
+
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={() => updateSettings({ voice: opt.id })}
+                      className={`py-3 px-3 rounded-xl transition-all text-center flex flex-col items-center justify-center gap-1 border shadow-sm cursor-pointer ${
+                        isSelected
+                          ? "bg-amber-500/20 border-amber-500/70 text-amber-300 font-bold shadow-amber-500/10 ring-1 ring-amber-500/40"
+                          : "bg-zinc-800/60 border-zinc-700/60 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/90"
+                      }`}
+                      title={opt.desc}
+                    >
+                      <div className="flex items-center gap-1.5 text-xs font-semibold">
+                        <span>{opt.label}</span>
+                        {isSelected && (
+                          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                        )}
+                      </div>
+                      <span
+                        className={`text-[10px] tracking-wide ${
+                          isSelected ? "text-amber-400/90 font-medium" : "text-zinc-500"
+                        }`}
+                      >
+                        {opt.tagline}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex items-center justify-center gap-1.5 text-[11px] text-zinc-400">
+                <span>AI Spoken Output:</span>
+                <span className="font-semibold text-amber-400">
+                  {settings.voice === "UK Accent" ||
+                  settings.voice.includes("UK") ||
+                  settings.voice.includes("British")
+                    ? "🇬🇧 UK British Accent"
+                    : "🇺🇸 USA American Accent"}
+                </span>
               </div>
             </div>
 

@@ -25,7 +25,7 @@ export class GeminiLiveClient {
 
   constructor(
     apiKey: string,
-    personaName = "Donald Trump",
+    personaName = "USA Accent",
     model?: string,
     callbacks: GeminiLiveCallbacks = {}
   ) {
