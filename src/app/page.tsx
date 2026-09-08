@@ -69,16 +69,19 @@ export default function HomePage() {
           <div>
             <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
               AccentChanger
-              <span className="text-[10px] uppercase font-mono px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 max-w-[160px] truncate">
+              <span className="text-[10px] uppercase font-mono px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 max-w-[220px] truncate">
                 {settings.voice === "UK Accent" ||
                 settings.voice.includes("UK") ||
                 settings.voice.includes("British")
-                  ? "🇬🇧 UK Accent"
-                  : "🇺🇸 USA Accent"}
+                  ? "🇬🇧 UK"
+                  : "🇺🇸 USA"}{" "}
+                • {settings.gender === "female" ? "👩 Female" : "👨 Male"}
               </span>
             </h1>
             <p className="text-xs text-zinc-400">
-              Real-time conversational voice & accent converter
+              {settings.mode === "changer"
+                ? "Voice chameleon: AI repeats & clones your speech in the selected accent"
+                : "Real-time conversational voice & accent assistant"}
             </p>
           </div>
         </div>
@@ -155,7 +158,7 @@ export default function HomePage() {
                     <button
                       key={opt.id}
                       onClick={() => updateSettings({ voice: opt.id })}
-                      className={`py-3 px-3 rounded-xl transition-all text-center flex flex-col items-center justify-center gap-1 border shadow-sm cursor-pointer ${
+                      className={`py-2.5 px-3 rounded-xl transition-all text-center flex flex-col items-center justify-center gap-0.5 border shadow-sm cursor-pointer ${
                         isSelected
                           ? "bg-amber-500/20 border-amber-500/70 text-amber-300 font-bold shadow-amber-500/10 ring-1 ring-amber-500/40"
                           : "bg-zinc-800/60 border-zinc-700/60 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/90"
@@ -180,14 +183,78 @@ export default function HomePage() {
                 })}
               </div>
 
-              <div className="flex items-center justify-center gap-1.5 text-[11px] text-zinc-400">
-                <span>AI Spoken Output:</span>
+              {/* Voice Gender Selection: Male vs Female */}
+              <div className="grid grid-cols-2 gap-2 w-full pt-1">
+                <button
+                  type="button"
+                  onClick={() => updateSettings({ gender: "male" })}
+                  className={`py-2 px-3 rounded-xl text-xs font-medium transition-all text-center flex items-center justify-center gap-1.5 border ${
+                    settings.gender === "male"
+                      ? "bg-blue-600/20 border-blue-500/70 text-blue-300 font-semibold shadow-sm ring-1 ring-blue-500/30"
+                      : "bg-zinc-800/50 border-zinc-700/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                  }`}
+                >
+                  <span>👨 Male Voice</span>
+                  {settings.gender === "male" && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateSettings({ gender: "female" })}
+                  className={`py-2 px-3 rounded-xl text-xs font-medium transition-all text-center flex items-center justify-center gap-1.5 border ${
+                    settings.gender === "female"
+                      ? "bg-pink-600/20 border-pink-500/70 text-pink-300 font-semibold shadow-sm ring-1 ring-pink-500/30"
+                      : "bg-zinc-800/50 border-zinc-700/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                  }`}
+                >
+                  <span>👩 Female Voice</span>
+                  {settings.gender === "female" && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-pink-400" />
+                  )}
+                </button>
+              </div>
+
+              {/* Behavior Mode Toggle: Repeat & Clone Accent vs Conversational */}
+              <div className="grid grid-cols-2 gap-2 w-full pt-1">
+                <button
+                  type="button"
+                  onClick={() => updateSettings({ mode: "changer" })}
+                  className={`py-1.5 px-2 rounded-lg text-[11px] transition-all text-center flex items-center justify-center gap-1 border ${
+                    settings.mode === "changer"
+                      ? "bg-amber-500/15 border-amber-500/50 text-amber-300 font-semibold"
+                      : "bg-zinc-900/60 border-zinc-800 text-zinc-500 hover:text-zinc-300"
+                  }`}
+                  title="AI repeats and mirrors what you say in the target accent"
+                >
+                  <span>🔁 Repeat & Clone</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateSettings({ mode: "conversation" })}
+                  className={`py-1.5 px-2 rounded-lg text-[11px] transition-all text-center flex items-center justify-center gap-1 border ${
+                    settings.mode === "conversation"
+                      ? "bg-blue-500/15 border-blue-500/50 text-blue-300 font-semibold"
+                      : "bg-zinc-900/60 border-zinc-800 text-zinc-500 hover:text-zinc-300"
+                  }`}
+                  title="AI answers and chats with you in the target accent"
+                >
+                  <span>💬 Conversational</span>
+                </button>
+              </div>
+
+              {/* Dynamic Live Status Description */}
+              <div className="flex items-center justify-center gap-1.5 text-[11px] text-zinc-400 text-center px-1">
+                <span>
+                  {settings.mode === "changer" ? "🔁 Echoes your speech in" : "💬 Speaks in"}:
+                </span>
                 <span className="font-semibold text-amber-400">
                   {settings.voice === "UK Accent" ||
                   settings.voice.includes("UK") ||
                   settings.voice.includes("British")
-                    ? "🇬🇧 UK British Accent"
-                    : "🇺🇸 USA American Accent"}
+                    ? "🇬🇧 British (UK)"
+                    : "🇺🇸 American (USA)"}{" "}
+                  {settings.gender === "female" ? "👩 Female" : "👨 Male"}
                 </span>
               </div>
             </div>

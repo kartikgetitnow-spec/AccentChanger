@@ -3,6 +3,7 @@ import { GeminiLiveClient } from "./gemini-live-client";
 import { RVCEngine } from "./rvc-engine";
 import { AudioConverter } from "./audio-converter";
 import { PcmUtils } from "./pcm-utils";
+import { VoiceGender, VoiceMode } from "./persona-prompts";
 
 import { AudioBufferQueue } from "./audio-buffer-queue";
 
@@ -10,6 +11,8 @@ export interface UserSession {
   id: string;
   socketId: string;
   voice: string;
+  gender: VoiceGender;
+  mode: VoiceMode;
   pitchShift: number;
   createdAt: number;
   lastActive: number;
@@ -43,7 +46,12 @@ export class SessionManager {
   /**
    * Initialize a new session for a connected socket
    */
-  createSession(socket: Socket, voice = "USA Accent"): UserSession {
+  createSession(
+    socket: Socket,
+    voice = "USA Accent",
+    gender: VoiceGender = "male",
+    mode: VoiceMode = "changer"
+  ): UserSession {
     if (!this.canAcceptSession()) {
       throw new Error("Server is at maximum concurrent session capacity. Please try again shortly.");
     }
@@ -52,6 +60,8 @@ export class SessionManager {
       id: socket.id,
       socketId: socket.id,
       voice,
+      gender,
+      mode,
       pitchShift: 0,
       createdAt: Date.now(),
       lastActive: Date.now(),
@@ -74,6 +84,8 @@ export class SessionManager {
   async startSessionStream(
     socket: Socket,
     voice?: string,
+    gender: VoiceGender = "male",
+    mode: VoiceMode = "changer",
     pitchShift?: number
   ): Promise<void> {
     const session = this.getSession(socket.id);
@@ -81,15 +93,31 @@ export class SessionManager {
       throw new Error("Session not found");
     }
 
+    const voiceChanged = voice && session.voice !== voice;
+    const genderChanged = gender && session.gender !== gender;
+    const modeChanged = mode && session.mode !== mode;
+
     if (voice) {
       session.voice = voice;
+    }
+    if (gender) {
+      session.gender = gender;
+    }
+    if (mode) {
+      session.mode = mode;
     }
     if (pitchShift !== undefined) {
       session.pitchShift = pitchShift;
     }
 
-    // Reuse existing ready client if voice has not changed
-    if (session.geminiClient && session.geminiClient.ready && (!voice || session.voice === voice)) {
+    // Reuse existing ready client if voice, gender, and mode have not changed
+    if (
+      session.geminiClient &&
+      session.geminiClient.ready &&
+      !voiceChanged &&
+      !genderChanged &&
+      !modeChanged
+    ) {
       session.isStreaming = true;
       session.lastActive = Date.now();
       return;
@@ -105,10 +133,12 @@ export class SessionManager {
       throw new Error("GEMINI_API_KEY is not configured on server.");
     }
 
-    // Instantiate Gemini Live Client for this specific user session
+    // Instantiate Gemini Live Client for this specific user session with voice, gender, and mode
     const gemini = new GeminiLiveClient(
       this.apiKey,
       session.voice,
+      session.gender,
+      session.mode,
       process.env.GEMINI_MODEL,
       {
         onAudioData: async (geminiPcm24k: Buffer) => {

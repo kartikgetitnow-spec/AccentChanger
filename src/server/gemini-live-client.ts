@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import { getPersona } from "./persona-prompts";
+import { getPersona, VoiceGender, VoiceMode } from "./persona-prompts";
 
 export interface GeminiLiveCallbacks {
   onAudioData?: (pcmChunk: Buffer) => void;
@@ -18,6 +18,8 @@ export class GeminiLiveClient {
   private apiKey: string;
   private model: string;
   private personaName: string;
+  private gender: VoiceGender;
+  private mode: VoiceMode;
   private callbacks: GeminiLiveCallbacks;
   private isConnected = false;
   private isReady = false;
@@ -26,11 +28,15 @@ export class GeminiLiveClient {
   constructor(
     apiKey: string,
     personaName = "USA Accent",
+    gender: VoiceGender = "male",
+    mode: VoiceMode = "changer",
     model?: string,
     callbacks: GeminiLiveCallbacks = {}
   ) {
     this.apiKey = apiKey;
     this.personaName = personaName;
+    this.gender = gender;
+    this.mode = mode;
     this.model = model || process.env.GEMINI_MODEL || "models/gemini-2.0-flash-exp";
     if (!this.model.startsWith("models/")) {
       this.model = `models/${this.model}`;
@@ -97,7 +103,7 @@ export class GeminiLiveClient {
   private sendSetup() {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
 
-    const persona = getPersona(this.personaName);
+    const persona = getPersona(this.personaName, this.gender, this.mode);
 
     const setupMessage = {
       setup: {

@@ -5,6 +5,8 @@ import { X, Sliders, Volume2, Mic, Cpu, Server } from "lucide-react";
 
 export interface ConversationSettings {
   voice: string;
+  gender: "male" | "female";
+  mode: "changer" | "conversation";
   pitchShift: number;
   latencyMode: "low-latency" | "high-quality";
   talkMode: "toggle" | "push-to-talk";
@@ -66,6 +68,78 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </select>
           <p className="text-[11px] text-zinc-500">
             Selected accent will be the spoken output voice of the AI in real-time.
+          </p>
+        </div>
+
+        {/* Voice Gender Selection */}
+        <div className="space-y-2">
+          <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+            <Mic className="w-3.5 h-3.5 text-pink-400" />
+            AI Voice Gender
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => onUpdateSettings({ gender: "male" })}
+              className={`py-2 px-3 text-xs font-medium rounded-xl border transition-all flex items-center justify-center gap-2 ${
+                settings.gender === "male"
+                  ? "bg-blue-600/20 border-blue-500 text-blue-200 font-semibold shadow-sm"
+                  : "bg-zinc-800/60 border-zinc-700/60 text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              <span>👨 Male Voice</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onUpdateSettings({ gender: "female" })}
+              className={`py-2 px-3 text-xs font-medium rounded-xl border transition-all flex items-center justify-center gap-2 ${
+                settings.gender === "female"
+                  ? "bg-pink-600/20 border-pink-500 text-pink-200 font-semibold shadow-sm"
+                  : "bg-zinc-800/60 border-zinc-700/60 text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              <span>👩 Female Voice</span>
+            </button>
+          </div>
+          <p className="text-[11px] text-zinc-500">
+            Matches your voice gender: Male (Puck/Charon) or Female (Aoede/Kore).
+          </p>
+        </div>
+
+        {/* Operation Mode */}
+        <div className="space-y-2">
+          <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+            <Sliders className="w-3.5 h-3.5 text-emerald-400" />
+            AI Behavior Mode
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => onUpdateSettings({ mode: "changer" })}
+              className={`py-2 px-3 text-xs font-medium rounded-xl border transition-all flex items-center justify-center gap-1.5 ${
+                settings.mode === "changer"
+                  ? "bg-amber-500/20 border-amber-500 text-amber-200 font-semibold shadow-sm"
+                  : "bg-zinc-800/60 border-zinc-700/60 text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              <span>🔁 Repeat & Clone Accent</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onUpdateSettings({ mode: "conversation" })}
+              className={`py-2 px-3 text-xs font-medium rounded-xl border transition-all flex items-center justify-center gap-1.5 ${
+                settings.mode === "conversation"
+                  ? "bg-blue-600/20 border-blue-500 text-blue-200 font-semibold shadow-sm"
+                  : "bg-zinc-800/60 border-zinc-700/60 text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              <span>💬 Conversational Partner</span>
+            </button>
+          </div>
+          <p className="text-[11px] text-zinc-500">
+            {settings.mode === "changer"
+              ? "AI will repeat and clone what you say in your chosen accent & gender."
+              : "AI will answer and chat with you in your chosen accent."}
           </p>
         </div>
 

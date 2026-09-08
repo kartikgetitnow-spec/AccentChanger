@@ -88,17 +88,38 @@ async function bootstrap() {
     });
 
     // Client starts microphone streaming session with persona
-    socket.on("start-stream", async (data?: { voice?: string; sampleRate?: number; pitchShift?: number }) => {
-      const selectedVoice = data?.voice || "USA Accent";
-      console.log(`[Socket.IO] Stream started for ${socket.id}. Voice: ${selectedVoice}, Pitch: ${data?.pitchShift ?? 0}`);
+    socket.on(
+      "start-stream",
+      async (data?: {
+        voice?: string;
+        gender?: "male" | "female";
+        mode?: "changer" | "conversation";
+        sampleRate?: number;
+        pitchShift?: number;
+      }) => {
+        const selectedVoice = data?.voice || "USA Accent";
+        const selectedGender = data?.gender || "male";
+        const selectedMode = data?.mode || "changer";
 
-      try {
-        await sessionManager.startSessionStream(socket, selectedVoice, data?.pitchShift);
-        socket.emit("status", {
-          status: "streaming",
-          voice: selectedVoice,
-          message: `Live session active with ${selectedVoice}`,
-        });
+        console.log(
+          `[Socket.IO] Stream started for ${socket.id}. Voice: ${selectedVoice}, Gender: ${selectedGender}, Mode: ${selectedMode}, Pitch: ${data?.pitchShift ?? 0}`
+        );
+
+        try {
+          await sessionManager.startSessionStream(
+            socket,
+            selectedVoice,
+            selectedGender,
+            selectedMode,
+            data?.pitchShift
+          );
+          socket.emit("status", {
+            status: "streaming",
+            voice: selectedVoice,
+            gender: selectedGender,
+            mode: selectedMode,
+            message: `Live session active with ${selectedVoice} (${selectedGender})`,
+          });
       } catch (err: unknown) {
         const error = err instanceof Error ? err : new Error(String(err));
         console.error(`[Socket.IO] Error starting stream for ${socket.id}:`, error);

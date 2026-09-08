@@ -39,14 +39,34 @@ export function useVoiceConversation() {
       } else if (rawVoice) {
         savedVoice = "USA Accent";
       }
+
+      const rawGender = localStorage.getItem("accent_changer_gender");
+      const savedGender: "male" | "female" = rawGender === "female" ? "female" : "male";
+
+      const rawMode = localStorage.getItem("accent_changer_mode");
+      const savedMode: "changer" | "conversation" =
+        rawMode === "conversation" ? "conversation" : "changer";
+
+      return {
+        voice: savedVoice,
+        gender: savedGender,
+        mode: savedMode,
+        pitchShift: 0,
+        latencyMode: "low-latency",
+        talkMode: "toggle",
+        echoCancellation: true,
+        serverUrl: savedServerUrl || process.env.NEXT_PUBLIC_SOCKET_URL || "",
+      };
     }
     return {
       voice: savedVoice,
+      gender: "male",
+      mode: "changer",
       pitchShift: 0,
       latencyMode: "low-latency",
       talkMode: "toggle",
       echoCancellation: true,
-      serverUrl: savedServerUrl || process.env.NEXT_PUBLIC_SOCKET_URL || "",
+      serverUrl: "",
     };
   });
 
@@ -255,6 +275,8 @@ export function useVoiceConversation() {
 
       socketRef.current.emit("start-stream", {
         voice: settings.voice,
+        gender: settings.gender,
+        mode: settings.mode,
         sampleRate: 16000,
         pitchShift: settings.pitchShift,
       });
@@ -310,6 +332,12 @@ export function useVoiceConversation() {
       }
       if (newSettings.voice !== undefined) {
         localStorage.setItem("accent_changer_voice", newSettings.voice);
+      }
+      if (newSettings.gender !== undefined) {
+        localStorage.setItem("accent_changer_gender", newSettings.gender);
+      }
+      if (newSettings.mode !== undefined) {
+        localStorage.setItem("accent_changer_mode", newSettings.mode);
       }
     }
     setSettings((prev) => ({ ...prev, ...newSettings }));
