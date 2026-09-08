@@ -50,24 +50,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="space-y-2">
           <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
             <Cpu className="w-3.5 h-3.5 text-blue-400" />
-            Accent & Voice Persona (AI Spoken Output)
+            Accent & Character Voice (AI Output)
           </label>
           <select
-            value={
-              settings.voice === "UK Accent" ||
-              settings.voice.toLowerCase().includes("uk") ||
-              settings.voice.toLowerCase().includes("british")
-                ? "UK Accent"
-                : "USA Accent"
-            }
+            value={settings.voice}
             onChange={(e) => onUpdateSettings({ voice: e.target.value })}
             className="w-full bg-zinc-800 border border-zinc-700 text-sm rounded-xl px-3 py-2.5 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="USA Accent">🇺🇸 USA Accent (American Voice Output)</option>
-            <option value="UK Accent">🇬🇧 UK Accent (British Voice Output)</option>
+            <optgroup label="Regional Accents">
+              <option value="USA Accent">🇺🇸 USA Accent (American Voice Output)</option>
+              <option value="UK Accent">🇬🇧 UK Accent (British Voice Output)</option>
+            </optgroup>
+            <optgroup label="Celebrity Voices">
+              <option value="Donald Trump">🎙️ Donald Trump (Bold & Charismatic)</option>
+              <option value="Morgan Freeman">🎙️ Morgan Freeman (Deep Iconic Narrator)</option>
+              <option value="Joe Rogan">🎙️ Joe Rogan (Curious Podcast Host)</option>
+              <option value="Arnold Schwarzenegger">🎙️ Arnold Schwarzenegger (Action Hero)</option>
+            </optgroup>
+            <optgroup label="Anime Characters">
+              <option value="Goku">⚡ Goku (Dragon Ball Saiyan)</option>
+              <option value="Naruto Uzumaki">🍥 Naruto Uzumaki (Hokage Hero)</option>
+              <option value="Gojo Satoru">👁️ Gojo Satoru (Limitless Jujutsu)</option>
+              <option value="Anime Heroine">🌸 Anime Heroine (Cute & Expressive)</option>
+            </optgroup>
           </select>
           <p className="text-[11px] text-zinc-500">
-            Selected accent will be the spoken output voice of the AI in real-time.
+            Selected voice will be the spoken output voice of the AI in real-time.
           </p>
         </div>
 

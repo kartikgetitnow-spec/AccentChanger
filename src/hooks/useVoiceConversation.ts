@@ -30,14 +30,8 @@ export function useVoiceConversation() {
         savedServerUrl = "https://accentchanger.onrender.com";
       }
       const rawVoice = localStorage.getItem("accent_changer_voice");
-      if (
-        rawVoice === "UK Accent" ||
-        rawVoice?.toLowerCase().includes("uk") ||
-        rawVoice?.toLowerCase().includes("british")
-      ) {
-        savedVoice = "UK Accent";
-      } else if (rawVoice) {
-        savedVoice = "USA Accent";
+      if (rawVoice) {
+        savedVoice = rawVoice;
       }
 
       const rawGender = localStorage.getItem("accent_changer_gender");

@@ -16,22 +16,10 @@ import {
   Trash2,
   Sparkles,
   Globe,
+  Star,
+  Zap,
 } from "lucide-react";
-
-const ACCENT_PRESETS = [
-  {
-    id: "USA Accent",
-    label: "🇺🇸 USA Accent",
-    tagline: "American Voice Output",
-    desc: "AI speaks in an authentic General American (USA) accent",
-  },
-  {
-    id: "UK Accent",
-    label: "🇬🇧 UK Accent",
-    tagline: "British Voice Output",
-    desc: "AI speaks in a refined British (UK) accent",
-  },
-];
+import { VOICE_PRESETS, VoiceCategory } from "@/server/persona-prompts";
 
 export default function HomePage() {
   const {
@@ -58,6 +46,33 @@ export default function HomePage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
 
+  // Determine active category based on current selected voice
+  const activePreset = VOICE_PRESETS.find((v) => v.id === settings.voice);
+  const initialCategory: VoiceCategory = activePreset
+    ? activePreset.category
+    : settings.voice.includes("Trump") ||
+      settings.voice.includes("Freeman") ||
+      settings.voice.includes("Rogan") ||
+      settings.voice.includes("Arnold")
+    ? "celebrity"
+    : settings.voice.includes("Goku") ||
+      settings.voice.includes("Naruto") ||
+      settings.voice.includes("Gojo") ||
+      settings.voice.includes("Heroine")
+    ? "anime"
+    : "accent";
+
+  const [selectedCategory, setSelectedCategory] = useState<VoiceCategory>(initialCategory);
+
+  const currentPreset = activePreset || {
+    id: settings.voice,
+    label: settings.voice,
+    tagline: "Custom Voice",
+    category: "accent" as VoiceCategory,
+    defaultGender: "male" as const,
+    geminiVoice: "Puck",
+  };
+
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center p-3 sm:p-6 font-sans selection:bg-blue-500 selection:text-white">
       {/* Top Header */}
@@ -69,19 +84,17 @@ export default function HomePage() {
           <div>
             <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
               AccentChanger
-              <span className="text-[10px] uppercase font-mono px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 max-w-[220px] truncate">
-                {settings.voice === "UK Accent" ||
-                settings.voice.includes("UK") ||
-                settings.voice.includes("British")
-                  ? "🇬🇧 UK"
-                  : "🇺🇸 USA"}{" "}
-                • {settings.gender === "female" ? "👩 Female" : "👨 Male"}
+              <span className="text-[10px] uppercase font-mono px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 max-w-[240px] truncate">
+                {currentPreset.label}
+                {currentPreset.category === "accent" && (
+                  <> • {settings.gender === "female" ? "👩 Female" : "👨 Male"}</>
+                )}
               </span>
             </h1>
             <p className="text-xs text-zinc-400">
               {settings.mode === "changer"
-                ? "Voice chameleon: AI repeats & clones your speech in the selected accent"
-                : "Real-time conversational voice & accent assistant"}
+                ? "Voice chameleon: AI repeats & clones your speech in the selected voice"
+                : "Real-time conversational AI voice & accent assistant"}
             </p>
           </div>
         </div>
@@ -144,26 +157,66 @@ export default function HomePage() {
                 </button>
               </div>
 
-              {/* Quick-Switch Accent Selector: USA vs UK */}
+              {/* Voice Category Switcher: Accents, Celebrities, Anime */}
+              <div className="flex items-center gap-1.5 p-1 bg-zinc-900/90 border border-zinc-800 rounded-xl w-full">
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory("accent")}
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                    selectedCategory === "accent"
+                      ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  <span>Accents</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory("celebrity")}
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                    selectedCategory === "celebrity"
+                      ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  <Star className="w-3.5 h-3.5" />
+                  <span>Celebrities</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory("anime")}
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                    selectedCategory === "anime"
+                      ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  <Zap className="w-3.5 h-3.5" />
+                  <span>Anime</span>
+                </button>
+              </div>
+
+              {/* Voice Cards Grid for Active Category */}
               <div className="grid grid-cols-2 gap-2.5 w-full">
-                {ACCENT_PRESETS.map((opt) => {
-                  const isSelected =
-                    settings.voice === opt.id ||
-                    (opt.id === "USA Accent" &&
-                      (settings.voice.includes("USA") || settings.voice.includes("American"))) ||
-                    (opt.id === "UK Accent" &&
-                      (settings.voice.includes("UK") || settings.voice.includes("British")));
+                {VOICE_PRESETS.filter((p) => p.category === selectedCategory).map((opt) => {
+                  const isSelected = settings.voice === opt.id;
 
                   return (
                     <button
                       key={opt.id}
-                      onClick={() => updateSettings({ voice: opt.id })}
+                      onClick={() => {
+                        updateSettings({
+                          voice: opt.id,
+                          gender: opt.defaultGender,
+                        });
+                      }}
                       className={`py-2.5 px-3 rounded-xl transition-all text-center flex flex-col items-center justify-center gap-0.5 border shadow-sm cursor-pointer ${
                         isSelected
                           ? "bg-amber-500/20 border-amber-500/70 text-amber-300 font-bold shadow-amber-500/10 ring-1 ring-amber-500/40"
                           : "bg-zinc-800/60 border-zinc-700/60 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/90"
                       }`}
-                      title={opt.desc}
+                      title={opt.tagline}
                     >
                       <div className="flex items-center gap-1.5 text-xs font-semibold">
                         <span>{opt.label}</span>
@@ -172,7 +225,7 @@ export default function HomePage() {
                         )}
                       </div>
                       <span
-                        className={`text-[10px] tracking-wide ${
+                        className={`text-[10px] tracking-wide truncate max-w-full ${
                           isSelected ? "text-amber-400/90 font-medium" : "text-zinc-500"
                         }`}
                       >
@@ -183,37 +236,39 @@ export default function HomePage() {
                 })}
               </div>
 
-              {/* Voice Gender Selection: Male vs Female */}
-              <div className="grid grid-cols-2 gap-2 w-full pt-1">
-                <button
-                  type="button"
-                  onClick={() => updateSettings({ gender: "male" })}
-                  className={`py-2 px-3 rounded-xl text-xs font-medium transition-all text-center flex items-center justify-center gap-1.5 border ${
-                    settings.gender === "male"
-                      ? "bg-blue-600/20 border-blue-500/70 text-blue-300 font-semibold shadow-sm ring-1 ring-blue-500/30"
-                      : "bg-zinc-800/50 border-zinc-700/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
-                  }`}
-                >
-                  <span>👨 Male Voice</span>
-                  {settings.gender === "male" && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => updateSettings({ gender: "female" })}
-                  className={`py-2 px-3 rounded-xl text-xs font-medium transition-all text-center flex items-center justify-center gap-1.5 border ${
-                    settings.gender === "female"
-                      ? "bg-pink-600/20 border-pink-500/70 text-pink-300 font-semibold shadow-sm ring-1 ring-pink-500/30"
-                      : "bg-zinc-800/50 border-zinc-700/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
-                  }`}
-                >
-                  <span>👩 Female Voice</span>
-                  {settings.gender === "female" && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-pink-400" />
-                  )}
-                </button>
-              </div>
+              {/* Voice Gender Selection: Only shown for Regional Accents */}
+              {selectedCategory === "accent" && (
+                <div className="grid grid-cols-2 gap-2 w-full pt-1">
+                  <button
+                    type="button"
+                    onClick={() => updateSettings({ gender: "male" })}
+                    className={`py-2 px-3 rounded-xl text-xs font-medium transition-all text-center flex items-center justify-center gap-1.5 border ${
+                      settings.gender === "male"
+                        ? "bg-blue-600/20 border-blue-500/70 text-blue-300 font-semibold shadow-sm ring-1 ring-blue-500/30"
+                        : "bg-zinc-800/50 border-zinc-700/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                    }`}
+                  >
+                    <span>👨 Male Voice</span>
+                    {settings.gender === "male" && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateSettings({ gender: "female" })}
+                    className={`py-2 px-3 rounded-xl text-xs font-medium transition-all text-center flex items-center justify-center gap-1.5 border ${
+                      settings.gender === "female"
+                        ? "bg-pink-600/20 border-pink-500/70 text-pink-300 font-semibold shadow-sm ring-1 ring-pink-500/30"
+                        : "bg-zinc-800/50 border-zinc-700/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                    }`}
+                  >
+                    <span>👩 Female Voice</span>
+                    {settings.gender === "female" && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-pink-400" />
+                    )}
+                  </button>
+                </div>
+              )}
 
               {/* Behavior Mode Toggle: Repeat & Clone Accent vs Conversational */}
               <div className="grid grid-cols-2 gap-2 w-full pt-1">
@@ -225,7 +280,7 @@ export default function HomePage() {
                       ? "bg-amber-500/15 border-amber-500/50 text-amber-300 font-semibold"
                       : "bg-zinc-900/60 border-zinc-800 text-zinc-500 hover:text-zinc-300"
                   }`}
-                  title="AI repeats and mirrors what you say in the target accent"
+                  title="AI repeats and mirrors what you say in the target voice"
                 >
                   <span>🔁 Repeat & Clone</span>
                 </button>
@@ -237,7 +292,7 @@ export default function HomePage() {
                       ? "bg-blue-500/15 border-blue-500/50 text-blue-300 font-semibold"
                       : "bg-zinc-900/60 border-zinc-800 text-zinc-500 hover:text-zinc-300"
                   }`}
-                  title="AI answers and chats with you in the target accent"
+                  title="AI answers and chats with you in the target voice"
                 >
                   <span>💬 Conversational</span>
                 </button>
@@ -246,15 +301,13 @@ export default function HomePage() {
               {/* Dynamic Live Status Description */}
               <div className="flex items-center justify-center gap-1.5 text-[11px] text-zinc-400 text-center px-1">
                 <span>
-                  {settings.mode === "changer" ? "🔁 Echoes your speech in" : "💬 Speaks in"}:
+                  {settings.mode === "changer" ? "🔁 Clones speech into" : "💬 Speaks as"}:
                 </span>
                 <span className="font-semibold text-amber-400">
-                  {settings.voice === "UK Accent" ||
-                  settings.voice.includes("UK") ||
-                  settings.voice.includes("British")
-                    ? "🇬🇧 British (UK)"
-                    : "🇺🇸 American (USA)"}{" "}
-                  {settings.gender === "female" ? "👩 Female" : "👨 Male"}
+                  {currentPreset.label}
+                  {currentPreset.category === "accent" && (
+                    <> ({settings.gender === "female" ? "👩 Female" : "👨 Male"})</>
+                  )}
                 </span>
               </div>
             </div>
